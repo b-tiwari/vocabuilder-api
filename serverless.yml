@@ -6,7 +6,7 @@ plugins:
   - serverless-webpack
 
 custom:
-  tableName: 'words-${opt:stage}'
+  tableName: 'vocab-words-${opt:stage}'
 
 provider:
   name: aws
@@ -24,6 +24,8 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Update
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
   environment:
     WORDS_TABLE: ${self:custom.tableName}
@@ -35,14 +37,14 @@ resources:
       Properties:
         TableName: ${self:custom.tableName}
         AttributeDefinitions:
-          - AttributeName: wordId
+          - AttributeName: userId
             AttributeType: S
-          - AttributeName: userId 
+          - AttributeName: wordId 
             AttributeType: S
         KeySchema:
-          - AttributeName: wordId
-            KeyType: HASH
           - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: wordId
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
@@ -64,6 +66,30 @@ functions:
       - http:
           path: words/{id}
           method: get
+          cors: true
+          authorizer: aws_iam
+  getLoggedUserWords:
+    handler: src/modules/words/get.main
+    events:
+      - http:
+          path: words
+          method: get
+          cors: true
+          authorizer: aws_iam
+  updateWord:
+    handler: src/modules/words/update.main
+    events:
+      - http:
+          path: words/{id}
+          method: put
+          cors: true
+          authorizer: aws_iam
+  deleteWord:
+    handler: src/modules/words/delete.main
+    events:
+      - http:
+          path: words/{id}
+          method: delete
           cors: true
           authorizer: aws_iam
   hello:

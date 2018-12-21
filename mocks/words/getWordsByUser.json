@@ -1,0 +1,8 @@
+{
+    "requestContext": {
+       "identity": {
+          "cognitoIdentityId": "TEST-LOCAL-USER-A"
+       }
+    }
+ }
+ 
